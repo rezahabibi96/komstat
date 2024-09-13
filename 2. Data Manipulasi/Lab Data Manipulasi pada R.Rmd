@@ -1,0 +1,929 @@
+---
+title: "Komputasi Statistika dengan R (bagian 2)"
+author: "Mochammad Reza Habibi"
+date: "2024-09-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Perapihan Data (Data Tidying)
+
+Setelah mempelajari topik ini, mahasiswa diharapkan mampu melakukan perapihan data agar lebih mudah untuk dimanipulasi dan divisualisasikan. Package yang digunakan 
+adalah tidyr.
+
+Materi yang akan dipelajari pada topik ini adalah membuat data frame/set data, merubah struktur data (reshape data), Mengatasi Missing value (handling missing value), 
+memisahkan atau menggabungkan sel (split and combine cell).
+
+## 1. Membuat Data Tibble
+Tibble adalah struktur data modern yang merupakan bagian dari paket `tidyverse`. `Tidyverse` adalah koleksi paket R yang dikembangkan untuk menyediakan tools yang konsisten dan efektif untuk analisis data dan visualisasi. Paket-paket dalam `tidyverse` dirancang untuk bekerja sama dengan mulus, sehingga memudahkan pengguna dalam perapihan dan manipulasi data. Beberapa paket utama dalam `tidyverse` adalah:
+
+- **`ggplot2`**: Untuk visualisasi data.
+- **`dplyr`**: Untuk manipulasi data (filter, select, arrange, summarize).
+- **`tidyr`**: Untuk perapihan data (separate, unite, pivot).
+- **`readr`**: Untuk membaca data (import dari berbagai format file).
+- **`stringr`**: Untuk manipulasi string (teks).
+- **`lubridate`**: Untuk manipulasi tanggal dan waktu.
+
+`Tidyverse` mempromosikan pendekatan yang bersih dan konsisten dalam coding, dengan penggunaan syntax yang intuitif dan operator pipes untuk chaining fungsi.
+
+
+Sedangkan `R Base` merujuk pada fungsi dan paket yang tersedia secara default dalam instalasi R tanpa perlu menginstal paket tambahan. Fungsi-fungsi ini mencakup berbagai operasi dasar, termasuk manipulasi data, statistik, dan visualisasi, meskipun dengan syntax dan metode yang lebih tradisional. Contoh fungsi R Base meliputi `plot()`, `hist()`, `boxplot()`, dan `aggregate()`.
+
+R Base vs. Tidyverse:
+
+- **Pendekatan dan Syntax**: `Tidyverse` menawarkan syntax yang lebih bersih dan konsisten dengan penggunaan operator pipes (`%>%`) untuk chaining fungsi, sedangkan `R Base` seringkali menggunakan syntax yang lebih panjang dan kompleks.
+- **Kemudahan Penggunaan**: `Tidyverse` dirancang untuk kemudahan penggunaan dan efisiensi, dengan fokus pada readability dan konsistensi, sementara `R Base` mungkin memerlukan lebih banyak penulisan kode dan pemahaman mendalam mengenai fungsi yang tersedia.
+- **Fitur dan Kapabilitas**: `Tidyverse` menyediakan berbagai fitur tambahan dan fungsi khusus yang tidak tersedia di `R Base`, seperti fungsi-fungsi untuk perapihan data yang lebih canggih dengan `tidyr` dan visualisasi yang lebih fleksibel dengan `ggplot2`.
+
+Dalam memilih antara `Tidyverse` dan `R Base`, pertimbangkan kebutuhan analisis data Anda, tingkat kenyamanan Anda dengan masing-masing pendekatan, dan kemudahan dalam menyusun kode yang efektif.
+
+Kembali pada topik Tibble adalah jenis data frame yang lebih fleksibel dan lebih mudah digunakan dibandingkan data frame standar di R. Tibble memudahkan manipulasi data dengan cara yang lebih bersih dan lebih jelas. Tibble juga lebih toleran terhadap data yang tidak lengkap dan dapat menampilkan data dengan lebih baik dalam output.
+
+Semisal Anda hendak membuat tabel sederhana:
+
+| x   | y   |
+|-----|-----|
+| 1   | a   |
+| 2   | b   |
+| 3   | c   |
+
+install package
+```{r}
+# silahkan skip bila sudah
+# install.packages("tidyr")
+```
+
+load package
+```{r}
+library(tidyr)
+```
+
+## a. implementasi tabel (berdasarkan kolom)
+```{r}
+data <- tibble(x = 1:3, 
+               y = c("a", "b", "c"))
+data
+```
+
+### b. implementasi tabel (berdasarkan baris)
+```{r}
+data <- tribble(~x, ~y, 
+                1, "a",
+                2, "b",
+                3, "c")
+data
+```
+
+## 2. Merubah Struktur Data
+
+Dalam analisis data, penting untuk memahami cara mengubah struktur data agar dapat melakukan analisis yang lebih efektif atau menyiapkan data untuk visualisasi. Dua format utama yang sering digunakan dalam analisis data adalah **format long** dan **format wide**. 
+
+**Format Long**
+
+Format long adalah struktur data di mana setiap baris mewakili satu unit pengamatan atau entitas. Informasi dari berbagai variabel disimpan dalam kolom yang terpisah. Format ini sering digunakan ketika data melibatkan banyak variabel yang perlu dianalisis secara bersamaan.
+
+**Contoh Format Long:**
+
+| product | month | sales |
+|---------|-------|-------|
+| A       | Jan   | 150   |
+| A       | Feb   | 200   |
+| A       | Mar   | 180   |
+| B       | Jan   | 220   |
+| B       | Feb   | 250   |
+| B       | Mar   | 230   |
+
+**Format Wide**
+
+Format wide adalah struktur data di mana setiap kombinasi variabel menjadi kolom terpisah. Format ini membuat data lebih mudah dibaca dalam beberapa kasus, terutama jika kita ingin melihat data dalam bentuk tabel yang lebih ringkas.
+
+**Contoh Format Wide:**
+
+| product | Jan | Feb | Mar |
+|---------|-----|-----|-----|
+| A       | 150 | 200 | 180 |
+| B       | 220 | 250 | 230 |
+
+Sering kali, data yang awalnya dalam format long perlu diubah menjadi format wide, atau sebaliknya, untuk memudahkan analisis. Proses ini memungkinkan kita untuk memanipulasi data sesuai kebutuhan analisis atau visualisasi kita.
+
+- **Mengubah dari Format Long ke Format Wide:** Ini melibatkan penyebaran nilai dari satu kolom menjadi beberapa kolom berdasarkan variabel lain.
+- **Mengubah dari Format Wide ke Format Long:** Ini melibatkan penggabungan beberapa kolom menjadi satu kolom dan menambahkan kolom tambahan untuk menyimpan nama kolom yang digabungkan.
+
+**Contoh Transformasi:**
+
+- **Dari Format Long ke Wide:**
+
+    | student | subject | score |
+    |---------|---------|-------|
+    | John    | Math    | 85    |
+    | John    | English | 90    |
+    | Jane    | Math    | 78    |
+    | Jane    | English | 88    |
+    | Mike    | Math    | 92    |
+    | Mike    | English | 85    |
+
+    Menjadi Format:
+
+    | student | Math | English |
+    |---------|------|---------|
+    | John    | 85   | 90      |
+    | Jane    | 78   | 88      |
+    | Mike    | 92   | 85      |
+
+- **Dari Format Wide ke Long:**
+
+    | location | year | Electricity | Gas  |
+    |----------|------|-------------|------|
+    | North    | 2022 | 1200        | 800  |
+    | South    | 2022 | 1000        | 650  |
+    | North    | 2023 | 1300        | 850  |
+
+    Menjadi Format:
+
+    | location | year | energy_type | usage |
+    |----------|------|-------------|-------|
+    | North    | 2022 | Electricity | 1200  |
+    | North    | 2022 | Gas         | 800   |
+    | South    | 2022 | Electricity | 1000  |
+    | South    | 2022 | Gas         | 650   |
+    | North    | 2023 | Electricity | 1300  |
+    | North    | 2023 | Gas         | 850   |
+
+Memahami format long dan wide serta cara mengubahnya adalah keterampilan penting dalam analisis data. Dengan format yang tepat, kita dapat melakukan analisis yang lebih efektif dan menghasilkan visualisasi yang lebih jelas.
+
+### a. menggunakan gather() (dari wide ke long)
+
+Semisal Anda memiliki tabel:
+
+| country | 1999  | 2000  |
+|---------|-------|-------|
+| A       | 0.7K  | 2K    |
+| B       | 37K   | 80K   |
+| C       | 212K  | 213K  |
+
+Anda hendak rubah menjadi:
+
+| country | year | cases |
+|---------|------|-------|
+| A       | 1999 | 0.7K  |
+| B       | 1999 | 3.7K  |
+| C       | 1999 | 212K  |
+| A       | 2000 | 2K    |
+| B       | 2000 | 80K   |
+| C       | 2000 | 213K  |
+
+implemantasi kode
+```{r}
+data_table1 <- tibble(country = c("A", "B", "C"),
+                      "1999" = c("0.7K", "37K", "212K"),
+                      "2000" = c("2K", "80K", "213K"))
+data_table1
+
+```
+
+implementasi gather()
+```{r}
+gather(data_table1, "1999", "2000",
+       key="year", value="cases")
+
+```
+
+Penjelasan Kode:
+
+- **data_table1**: Ini adalah nama data frame atau tibble yang akan diubah formatnya. Dalam hal ini, `data_table` adalah data frame dalam format wide yang berisi kolom-kolom seperti `1999` dan `2000`.
+
+- **"1999", "2000"**: Ini adalah nama-nama kolom yang akan diubah menjadi nilai dalam kolom baru. Dengan kata lain, kolom-kolom ini akan dipindahkan ke dalam satu kolom baru.
+
+- **key="year"**: Nama kolom baru yang akan dibuat untuk menyimpan nama-nama kolom yang dipilih (`1999` dan `2000`). Dalam data long yang dihasilkan, kolom ini akan berisi nilai `1999` atau `2000`.
+
+- **value="cases"**: Nama kolom baru yang akan dibuat untuk menyimpan nilai-nilai dari kolom yang dipilih. Data dalam kolom yang sebelumnya ada di `1999` dan `2000` akan dipindahkan ke dalam kolom ini.
+
+### b. menggunakan spread() (dari long wide)
+
+Semisal Anda memiliki tabel:
+
+| country | year | type | count |
+|---------|------|------|-------|
+| A       | 1999 | cases | 0.7K  |
+| A       | 1999 | pop   | 19M   |
+| A       | 2000 | cases | 2K    |
+| A       | 2000 | pop   | 20M   |
+| B       | 1999 | cases | 37K   |
+| B       | 1999 | pop   | 172M  |
+| B       | 2000 | cases | 80K   |
+| B       | 2000 | pop   | 174M  |
+| C       | 1999 | cases | 212K  |
+| C       | 1999 | pop   | 1T    |
+| C       | 2000 | cases | 213K  |
+| C       | 2000 | pop   | 1T    |
+
+Anda hendak rubah menjadi:
+
+| country | year | cases | pop   |
+|---------|------|-------|-------|
+| A       | 1999 | 0.7K  | 19M   |
+| A       | 2000 | 2K    | 20M   |
+| B       | 1999 | 37K   | 172M  |
+| B       | 2000 | 80K   | 174M  |
+| C       | 1999 | 212K  | 1T    |
+| C       | 2000 | 213K  | 1T    |
+
+implementasi kode
+```{r}
+data_table2 <- tibble(country = c(rep("A", 4), rep("B", 4), rep("C", 4)),
+                      year = c('1999', '1999', '2000', '2000', '1999', '1999', 
+                               '2000', '2000', '1999', '1999', '2000', '2000'),
+                      type = c('cases', 'pop', 'cases', 'pop', 'cases', 'pop', 
+                               'cases', 'pop', 'cases', 'pop', 'cases', 'pop'),
+                      count = c('0.7K', '19M', '2K', '20M', '37K', '172M', 
+                                '80K', '174M', '212K', '1T', '213K', '1T'))
+data_table2
+```
+
+implementasi spread()
+```{r}
+spread(data_table2, key=type, value=count)
+```
+
+Penjelasan Kode:
+
+- **`data_table2`**: Ini adalah nama data frame atau tibble yang akan diubah formatnya. Dalam hal ini, `Table2` adalah data frame dalam format long yang berisi kolom-kolom seperti `country`, `year`, `type`, dan `count`.
+
+- **`key=type`**: Ini adalah nama kolom yang nilai-nilainya akan digunakan untuk membuat kolom baru dalam format wide. Dalam data yang dihasilkan, nilai-nilai dari kolom `type` (misalnya, `cases` dan `pop`) akan menjadi nama-nama kolom baru.
+
+- **`value=count`**: Ini adalah nama kolom yang nilai-nilainya akan dimasukkan ke dalam kolom-kolom baru yang dibuat berdasarkan nilai-nilai dalam kolom `type`. Dalam data yang dihasilkan, nilai-nilai dari kolom `count` akan diatur ke dalam kolom-kolom baru (`cases` dan `pop`) sesuai dengan baris data yang ada.
+
+### c. menggunakan pivot_longer (versi terbaru dari gather)
+
+Dalam paket **tidyr** versi lama, fungsi **`gather()`** dan **`spread()`** digunakan untuk mengubah struktur data antara format wide dan long. Namun, dalam versi terbaru **tidyr**, fungsi-fungsi ini telah digantikan oleh **`pivot_longer()`** dan **`pivot_wider()`**. Kedua pasangan fungsi ini memiliki tujuan yang sama tetapi dengan sintaks yang lebih konsisten dan fungsionalitas yang ditingkatkan.
+
+**`gather()` vs `pivot_longer()`**
+
+- **`gather()`**: Digunakan untuk mengubah data dari format wide ke format long. Fungsi ini menggabungkan beberapa kolom menjadi dua kolom: satu kolom untuk nama kolom asli dan satu kolom untuk nilai-nilai kolom tersebut.
+
+- **`pivot_longer()`**: Menggantikan `gather()` dengan cara yang lebih intuitif dan konsisten. Fungsi ini memindahkan nilai-nilai dari beberapa kolom menjadi satu kolom, dengan nama kolom yang digabungkan disimpan dalam kolom terpisah. `pivot_longer()` memberikan kontrol yang lebih baik atas pengaturan kolom yang dipilih dan nama kolom yang dihasilkan.
+
+**`spread()` vs `pivot_wider()`**
+
+- **`spread()`**: Digunakan untuk mengubah data dari format long ke format wide. Fungsi ini menyebarkan nilai-nilai dari satu kolom menjadi beberapa kolom berdasarkan kategori yang relevan.
+
+- **`pivot_wider()`**: Menggantikan `spread()` dengan fitur yang lebih modern dan fungsional. Fungsi ini menyebarkan nilai-nilai dari kolom yang ditentukan ke dalam beberapa kolom baru berdasarkan nilai-nilai dari kolom lain. `pivot_wider()` menawarkan lebih banyak fleksibilitas dan kontrol atas pemilihan kolom dan pengaturan data.
+
+Dengan beralih ke **`pivot_longer()`** dan **`pivot_wider()`**, pengguna dapat menikmati sintaks yang lebih konsisten dan intuitif dalam mengubah format data, serta mendapatkan fitur tambahan yang tidak tersedia dalam fungsi **`gather()`** dan **`spread()`** yang lebih lama. Fungsi-fungsi baru ini mempermudah manipulasi dan transformasi data dalam berbagai aplikasi analisis.
+
+implementasi kode
+```{r}
+pivot_longer(data_table1, 
+             cols = "1999":"2000", 
+             names_to = "year", 
+             values_to = "cases")
+```
+
+### d. menggunakan pivot_wider (versi terbaru dari spread)
+
+implementasi kode
+```{r}
+pivot_wider(data_table2, 
+            names_from = type, 
+            values_from = count)
+
+```
+
+
+## 3. Memisahkan dan Menggabungkan Cells
+
+Dalam pengolahan data, sering kali kita menghadapi situasi di mana informasi yang diperlukan tidak selalu tersaji dalam format yang paling berguna untuk analisis atau visualisasi. Salah satu tantangan umum adalah menangani kolom yang berisi data gabungan atau terpisah yang perlu dipisahkan atau digabungkan. Untuk mengatasi masalah ini, kita dapat menggunakan fungsi **`separate()`** dan **`unite()`** dari paket **tidyr** di R.
+
+**Memisahkan Cells dengan `separate()`**
+
+Kolom dalam data sering kali berisi beberapa informasi gabungan yang seharusnya berada di kolom yang berbeda untuk analisis yang lebih baik. Fungsi **`separate()`** memungkinkan Anda untuk memecah kolom tersebut menjadi beberapa kolom terpisah berdasarkan pemisah tertentu, seperti koma, spasi, atau karakter lainnya. Dengan memisahkan cells, Anda dapat menguraikan informasi yang kompleks menjadi unit-unit yang lebih mudah dikelola.
+
+- **Kapan Digunakan**: Ketika Anda memiliki satu kolom yang mengandung beberapa data terpisah yang perlu dipisahkan menjadi beberapa kolom untuk memudahkan analisis atau pemrosesan lebih lanjut.
+- **Contoh Kasus**: Memisahkan kolom alamat yang berisi informasi seperti "Jalan Raya No. 10, Jakarta" menjadi kolom terpisah untuk jalan, nomor, dan kota.
+
+**Menggabungkan Cells dengan `unite()`**
+
+Sebaliknya, ada kalanya Anda memiliki beberapa kolom yang berisi bagian dari informasi terkait dan perlu menggabungkannya menjadi satu kolom. Fungsi **`unite()`** memungkinkan Anda untuk menggabungkan beberapa kolom menjadi satu kolom dengan menambahkan pemisah di antara nilai-nilainya. Ini membantu menyederhanakan data atau menyusun informasi dalam format yang lebih ringkas dan teratur.
+
+- **Kapan Digunakan**: Ketika Anda ingin menggabungkan beberapa kolom yang memiliki informasi terkait menjadi satu kolom gabungan untuk keperluan analisis atau presentasi data.
+- **Contoh Kasus**: Menggabungkan kolom tahun, bulan, dan hari menjadi satu kolom tanggal dengan format "YYYY-MM-DD" untuk analisis waktu yang lebih mudah.
+
+Fungsi **`separate()`** dan **`unite()`** dari paket **tidyr** memungkinkan Anda untuk melakukan manipulasi data pada tingkat kolom dengan cara memisahkan atau menggabungkan cells. Dengan memisahkan kolom yang berisi data gabungan atau menggabungkan beberapa kolom menjadi satu, Anda dapat menyesuaikan format data sesuai dengan kebutuhan analisis atau presentasi, serta mempermudah proses pengolahan data.
+
+### a. penggunaan separate
+
+Semisal Anda memiliki tabel:
+
+| country | year | rate       |
+|---------|------|------------|
+| A       | 1999 | 0.7K/19M   |
+| A       | 2000 | 2K/20M     |
+| B       | 1999 | 37K/172M   |
+| B       | 2000 | 80K/174M   |
+| C       | 1999 | 212K/1T    |
+| C       | 2000 | 213K/1T    |
+
+Anda perlu memisahkan informasi pada kolom 'rate' (case/pop) menjadi kolom case dan pop sendiri, supaya lebih mudah dibaca:
+
+| country | year | cases | pop  |
+|---------|------|-------|------|
+| A       | 1999 | 0.7K  | 19M  |
+| A       | 2000 | 2K    | 20M  |
+| B       | 1999 | 37K   | 172M |
+| B       | 2000 | 80K   | 174M |
+| C       | 1999 | 212K  | 1T   |
+| C       | 2000 | 213K  | 1T   |
+
+buat tabel:
+```{r}
+data_table3 <- tibble(
+  country = c(rep("A", 2), rep("B", 2), rep("C", 2)),
+  year = c("1999", "2000", "1999", "2000", "1999", "2000"),
+  rate = c("0.7K/19M", "2K/20M", "37K/172M", "80K/174M", "212K/1T", "213K/1T")
+)
+
+```
+
+implementasi separate
+```{r}
+separate(data_table3, rate, sep="/", into=c("cases","pop"))
+```
+
+Penjelasan Kode:
+
+- **`data_table3`**: Ini adalah nama data frame atau tibble yang akan diubah formatnya. Dalam hal ini, `data_table3` adalah tibble yang memiliki kolom `rate` yang berisi data gabungan.
+
+- **`rate`**: Ini adalah nama kolom dalam `data_table3` yang berisi nilai-nilai gabungan yang akan dipisahkan. Dalam contoh ini, kolom `rate` mengandung informasi gabungan seperti "0.7K/19M", "2K/20M", dan seterusnya.
+
+- **`sep="/"`**: Ini adalah pemisah yang digunakan untuk memisahkan nilai-nilai dalam kolom `rate`. Dalam hal ini, nilai-nilai dalam kolom `rate` dipisahkan oleh karakter `/`.
+
+- **`into=c("cases", "pop")`**: Ini adalah nama-nama kolom baru yang akan dibuat setelah pemisahan. Fungsi `separate()` akan membagi kolom `rate` menjadi dua kolom terpisah, yaitu `cases` dan `pop`. Nilai sebelum `/` akan dimasukkan ke dalam kolom `cases`, sedangkan nilai setelah `/` akan dimasukkan ke dalam kolom `pop`.
+
+### b. penggunaan unite
+
+Semisal Anda memiliki tabel:
+
+| country | century | year |
+|---------|---------|------|
+| Afghan  | 19      | 99   |
+| Afghan  | 20      | 00   |
+| Brazil  | 19      | 99   |
+| Brazil  | 20      | 00   |
+| China   | 19      | 99   |
+| China   | 20      | 00   |
+
+Anda perlu menggabungkan informasi pada kolom 'century' dan 'year' menjadi satu kolom saja 'year', supaya tabel lebih sederhana:
+
+| country | year |
+|---------|------|
+| Afghan  | 1999 |
+| Afghan  | 2000 |
+| Brazil  | 1999 |
+| Brazil  | 2000 |
+| China   | 1999 |
+| China   | 2000 |
+
+buat tabel:
+```{r}
+data_table4 <- tibble(
+  country = c("Afghan", "Afghan", "Brazil", "Brazil", "China", "China"),
+  century = c("19", "20", "19", "20", "19", "20"),
+  year = c("99", "00", "99", "00", "99", "00")
+)
+
+```
+
+implementasi unite
+```{r}
+unite(data_table4, century, year, col="year", sep="")
+```
+
+Penjelasan Kode
+
+- **`data_table4`**: Ini adalah nama data frame atau tibble yang akan diubah formatnya. Dalam hal ini, `data_table4` adalah tibble yang memiliki kolom `century` dan `year` yang akan digabungkan.
+
+- **`century` dan `year`**: Ini adalah nama-nama kolom dalam `data_table4` yang akan digabungkan menjadi satu kolom. Kolom `century` dan `year` masing-masing berisi informasi yang ingin digabungkan.
+
+- **`col="year"`**: Ini adalah nama kolom baru yang akan dibuat setelah penggabungan. Kolom ini akan menyimpan hasil penggabungan dari kolom `century` dan `year`.
+
+- **`sep=""`**: Ini adalah pemisah yang digunakan antara nilai-nilai yang digabungkan. Dalam hal ini, pemisah yang digunakan adalah string kosong (`""`), artinya tidak ada pemisah yang ditambahkan di antara nilai-nilai yang digabungkan.
+
+## 4. Memeriksa dan Menangani Missing Value
+Missing value atau nilai yang hilang adalah masalah umum dalam analisis data. Memeriksa dan menangani missing value sangat penting untuk memastikan bahwa analisis tidak terdistorsi oleh data yang tidak lengkap. Ini termasuk mengidentifikasi missing value, menentukan penyebabnya, dan memutuskan bagaimana menanganinya, baik dengan mengisi, menghapus, atau menggunakan metode lainnya.
+
+### a. memeriksa missing value
+
+Untuk demonstrasi, Anda akan menggunakan dataset bawaan yaitu mtcars. 
+
+load data bawaan pada R (mtcars)
+```{r}
+data("mtcars")
+head(mtcars)
+```
+
+`mtcars` adalah dataset yang berisi data tentang mobil-mobil dari berbagai jenis. Data ini diambil dari hasil uji coba mobil di tahun 1974, yang dikumpulkan dari majalah Motor Trend.
+
+**Struktur Data**
+
+- **Jumlah Baris**: 32
+- **Jumlah Kolom**: 11
+
+**Penjelasan Variabel**
+
+- **`mpg`**: Miles per gallon (konsumsi bahan bakar mobil)
+- **`cyl`**: Jumlah silinder mesin
+- **`disp`**: Displacement (volume silinder mesin, dalam inci kubik)
+- **`hp`**: Horsepower (tenaga kuda mesin)
+- **`drat`**: Rear axle ratio (rasio poros belakang)
+- **`wt`**: Weight (berat mobil, dalam ribuan pound)
+- **`qsec`**: 1/4 mile time (waktu tempuh 1/4 mil, dalam detik)
+- **`vs`**: Engine type (0 = V-shaped, 1 = straight)
+- **`am`**: Transmission (0 = automatic, 1 = manual)
+- **`gear`**: Jumlah gigi transmisi
+- **`carb`**: Jumlah karburator
+
+Untuk memeriksa nilai yang hilang (missing value), Anda bisa menggunakan dua cara: `is.na()` atau `!is.na()`. Fungsi `is.na()` akan menghasilkan `TRUE` jika nilai hilang, sedangkan `!is.na()` akan menghasilkan `TRUE` jika nilai tidak hilang. Sebelum itu, Anda harus mengubah `mtcars` dari data frame (bawaan R) menjadi tibble (dari tidyverse).
+
+convert dataframe into tibble
+```{r}
+mtcars_tibble <- as_tibble(mtcars)
+head(mtcars_tibble)
+```
+
+implementasi kode
+```{r}
+head(is.na(mtcars_tibble))
+```
+
+Dari hasilnya, 6 baris pertama menunjukkan nilai `FALSE` di semua kolom, yang berarti bahwa 6 baris pertama tidak memiliki nilai yang hilang (missing value) sama sekali.
+
+### b. menangani missing value
+
+Menangani nilai yang hilang adalah langkah penting dalam pembersihan data. Dalam R, khususnya dengan menggunakan paket `tidyr` dari tidyverse, Anda memiliki beberapa metode untuk mengatasi nilai yang hilang. Berikut adalah tiga metode umum:
+
+- **`drop_na()`**: Fungsi `drop_na()` digunakan untuk menghapus baris yang memiliki nilai yang hilang. Ini berarti jika ada satu atau lebih nilai yang hilang dalam baris tertentu, baris tersebut akan dihapus dari dataset. Metode ini berguna ketika Anda ingin membersihkan data dengan cara menghapus entri yang tidak lengkap.
+
+- **`fill()`**: Fungsi `fill()` digunakan untuk mengisi nilai yang hilang dengan nilai yang ada sebelumnya atau sesudahnya dalam dataset. Metode ini bermanfaat untuk data berurutan, seperti data waktu, di mana Anda ingin mengisi nilai yang hilang dengan data yang relevan dari posisi sebelumnya atau setelahnya.
+
+- **`replace_na()`**: Fungsi `replace_na()` memungkinkan Anda mengganti nilai yang hilang dengan nilai tertentu yang Anda pilih. Ini berguna jika Anda ingin mengganti nilai yang hilang dengan nilai default atau nilai lain yang sesuai dengan analisis Anda.
+
+Semisal Anda memiliki tabel dengan missing value:
+
+| X1 | X2  |
+|----|-----|
+| A  | 1   |
+| B  | NA  |
+| C  | NA  |
+| D  | 3   |
+| E  | NA  |
+
+- dengan drop_na, tabel menjadi:
+
+| X1 | X2 |
+|----|----|
+| A  | 1  |
+| D  | 3  |
+
+- dengan fill, tabel menjadi:
+
+| X1 | X2 |
+|----|----|
+| A  | 1  |
+| B  | 1  |
+| C  | 1  |
+| D  | 3  |
+| E  | 3  |
+
+- dengan replace_na, tabel menjadi:
+
+| X1 | X2 |
+|----|----|
+| A  | 1  |
+| B  | 2  |
+| C  | 2  |
+| D  | 3  |
+| E  | 2  |
+
+buat tabel:
+```{r}
+data_mv <- tibble(
+  X1 = c("A", "B", "C", "D", "E"),
+  X2 = c(1, NA, NA, 3, NA)
+)
+data_mv
+```
+
+implementasi kode (drop_na)
+```{r}
+drop_na(data_mv, X2)
+```
+
+implementasi kode (fill)
+```{r}
+fill(data_mv, X2, .direction="up")
+```
+Fungsi fill akan mengisi missing value dengan nilai dari baris sebelum (.direction = up) atau sesudah (.direction = down) nya. 
+
+implementasi kode (replace_na)
+```{r}
+replace_na(data_mv, list(X2 = 4))
+```
+
+# Manipulasi Data (Data Manipulation)
+
+Setelah mempelajari topik ini, Anda diharapkan mampu melakukan manipulasi data untuk memudahkan user dalam melakukan analisis berdasarkan data yang diperlukan. Package yang digunakan adalah dplyr.
+
+Materi yang akan dipelajari pada topik ini adalah manipulasi baris/cases, manipulasi kolom/variabel, mengkombinasikan tabel, aggregating untuk mendapatkan nilai tertentu, dan menyimpulkan berdasarkan baris/kolom.
+
+install package
+```{r}
+# silahkan skip bila sudah
+# install.packages("dplyr")
+```
+
+load package
+```{r}
+library(dplyr)
+```
+
+## 1. Manipulasi Baris/Observasi
+
+Pada bagian kali ini, mtcars, dataset bawaan akan dipergunakan untuk melakukan manipulasi baris/observasi. Versi tibble dari mtcars sudah dibuat di atas.
+```{r}
+head(mtcars_tibble)
+```
+
+### a. Mengambil beberapa cases berdasarkan nilai tertentu
+
+Fungsi `filter()` dipergunakan untuk menseleksi baris yang memiliki prooperti tertentu (misal mpg>20), implementasi kode:
+```{r}
+head(
+  filter(mtcars_tibble, mpg>20)
+)
+```
+
+Selain operator pembanding `>`, berikut adalah operator pembanding untuk `filter`:
+
+| Operator | Fungsi                                                |
+|----------|-------------------------------------------------------|
+| ==       | Sama dengan                                           |
+| !=       | Tidak sama dengan                                     |
+| <        | Lebih kecil                                           |
+| >        | Lebih besar                                           |
+| <=       | Lebih kecil sama dengan                               |
+| >=       | Lebih besar sama dengan                               |
+| is.na    | Deteksi missing value                                 |
+| !is.na   | Deteksi missing value                                 |
+| %in%     | Cek apakah sebuah nilai merupakan bagian dari vektor  |
+| !        | Operator tidak                                        |
+| \|       | Operator atau                                         |
+| &        | Operator dan                                          |
+| xor      | Exclusive or                                          |
+
+### b. Mendapatkan nilai-nilai unik
+
+Fungsi `distinct()` dipergunakan untuk mengetahui nilai-nilai unik yang terdapat pada variabel tertentu (misal cyl), implementasi kode:
+```{r}
+distinct(mtcars_tibble, cyl)
+```
+
+Dari hasilnya, diketahui bahwa pada kolom cyl terdapat nilai-nilai unik: 6, 4, 8. 
+
+### c. Memlih baris berdasarkan posisi
+
+Fungsi `` dipergunakan untuk mendapatkan baris pada posisi tertentu (misal baris 3-9), implementasi kode
+```{r}
+slice(mtcars_tibble, 3:9)
+```
+
+### d. Memlih baris secara random
+Selain itu, Fungsi `slice_sample` dipergunakan untuk mendapatkan baris secara acak, implementasi kode:
+```{r}
+slice_sample(mtcars_tibble, n = 5)
+```
+
+### e. Memilih baris berdasarkan urutan pada variabel
+
+Fungsi `slice_min()` dipergunakan untuk memilih baris berdasarkan urutan pada variabel tertentu dan diurutkan berdasarkan dari yang terkecil hingga ke yang terbesar. Sedangkan untuk `slice_max()` digunakan untuk memilih baris dari yang memiliki nilai terbesar ke yang terkecil.
+
+implementasi kode (slice_min)
+```{r}
+slice_min(mtcars_tibble, mpg, prop=0.2)
+```
+
+prop=0.2 berarti sebanyak 20% data terambil
+
+implementasi kode (slice_max)
+```{r}
+slice_max(mtcars_tibble, mpg, prop=0.2)
+```
+
+### f. Memilih baris berdasarkan baris teratas/terbawah
+
+Fungsi `slice_head()` digunakan untuk memilih baris teratas sebanyak tertentu, mirip dengan fungsi `head()` bawaan R. Sedangkan fungsi `slice_tail()` digunakan untuk memilih baris terbawah sebanyak tertentu, mirip dengan fungsi `tail()` bawaan R.
+
+implementasi kode (slice_head)
+```{r}
+slice_head(mtcars_tibble, n=5)
+```
+
+implementasi kode (slice_tail)
+```{r}
+slice_tail(mtcars_tibble, n=5)
+```
+
+### g. Mengurutkan Baris
+
+Fungsi `arrange()` dipergunakan untuk mengurutkan data berdasarkan variabel tertentu, implementasi kode:
+```{r}
+head(
+  arrange(mtcars_tibble, desc(mpg)) # dari kecil ke besar
+)
+# arrange(mtcars_tibble, mpg) dari besar ke kecil
+```
+
+### h. Menambah Baris
+
+Fungsi `add_row()` dipergunakan untuk menambah baris, implementasi kode:
+```{r}
+mtcars_tibble_add_row <- add_row(mtcars_tibble,
+                                 mpg=1, cyl=1, disp=1, hp=1, drat=1, 
+                                 wt=1, qsec=1, vs=1, am=1, gear=1, carb=1)
+```
+
+periksa hasil
+```{r}
+tail(mtcars_tibble_add_row)
+```
+
+## 2. Manipulasi Kolom/Variabel
+
+Pada bagian kali ini, masih menggunakan dataset mtcars, dataset bawaan, untuk melakukan manipulasi Kolom/Variabel. Versi tibble dari mtcars sudah dibuat di atas.
+
+```{r}
+head(mtcars_tibble)
+```
+
+### a. Mengekstrak nilai pada kolom sebagai vektor
+
+Fungsi `pull()` dipergunakan untuk mengekstrak nilai pada kolom sebagai vektor, implementasi kode
+```{r}
+pull(mtcars_tibble, var = mpg) # by nama variabel (wt)
+```
+```{r}
+pull(mtcars_tibble, var = 1) # by posisi variabel (1)
+```
+
+### b. Mengekstrak nilai pada kolom sebagai tabel
+
+Fungsi `select()` dipergunakan untuk mengekstrak nilai pada kolom sebagai tabel, implementas kode
+```{r}
+head(
+  select(mtcars_tibble, mpg, cyl) # ekstrak nilai dari varibel: mpg & cyl
+)
+```
+
+Daftar berikut adalah fungsi pemakaian lain dari select:
+
+- **starts_with()**: Memilih variabel berdasarkan prefix.
+```{r}
+head(
+  select(as_tibble(iris), starts_with("Sepal"))
+) 
+# ekstrak variabel ekstrak variabel yang namanya starts_with Sepal
+
+```
+
+- **ends_with()**: Memilih variabel berdasarkan suffix.
+```{r}
+head(
+  select(as_tibble(iris), ends_with("Width"))
+) 
+# ekstrak variabel ekstrak variabel yang namanya ends_with Width
+```
+
+- **contains()**: Memilih variabel yang mengandung kata tertentu.
+```{r}
+head(
+  select(as_tibble(iris), contains("al"))
+) 
+# ekstrak variabel ekstrak variabel yang namanya memuat al
+```
+
+- **matches()**: Memilih variabel dengan kata tertentu.
+```{r}
+head(
+  select(as_tibble(iris), matches("[pt]al"))
+) 
+# ekstrak variabel yang namanya mengandung huruf p atau t yang diikuti oleh "al"
+```
+
+- **num_range()**: Memilih variabel berdasarkan prefix dan range-nya.
+```{r}
+head(
+  select(billboard, num_range("wk", 10:15))
+) 
+# ekstrak variabel yang namanya dimulai dengan "wk" diikuti oleh angka dari 10 hingga 15.
+```
+
+### c. Memindahkan kolom ke kolom yang lain
+
+Fungsi `relocate()` dipergunakan untuk memindahkan kolom, implementas kode
+```{r}
+head(
+  relocate(mtcars_tibble, disp, hp, last_col())
+)
+```
+
+Susunan awal kolom: mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb. Setelah relocate, susunan akhir kolom: disp, hp, carb (last_col), mpg, cyl, drat, wt, qsec, vs, am, gear.
+
+## 3. Membuat Variabel
+
+Pada bagian kali ini, masih menggunakan dataset mtcars, dataset bawaan, untuk membuat Kolom/Variabel yang baru. Versi tibble dari mtcars sudah dibuat di atas.
+
+```{r}
+head(mtcars_tibble)
+```
+
+### a. Menggunakan mutate
+
+Fungsi `mutate()` dipergunakan untuk membuat variabel baru **dengan tanpa** menghilangkan variabel yang lainnya, implementasi kode:
+```{r}
+mtcars_tibble_mutate <- mutate(mtcars_tibble, gpm = 1/mpg) # buat variabel baru gpm
+mtcars_tibble_mutate[, 1:4] # select data semua baris & beberapa kolom (1:4)
+```
+### b. Menggunakan transmute
+
+Fungsi `transmute()` dipergunakan untuk membuat variabel baru **dengan** menghilangkan variabel yang lainnya, implementasi kode:
+```{r}
+mtcars_tibble_transmute <- transmute(mtcars_tibble, gpm = 1/mpg)
+mtcars_tibble_transmute[1:4, ] # select data semua kolom & beberapa baris (1:4)
+```
+
+Berikut adalah beberapa fungsi yang dapat digunakan bersamaan dengan `mutate()` dan `transmute()`:
+
+**Offset**
+
+- **lag()**: Menggeser nilai elemen ke belakang (menghilangkan elemen pertama).
+- **lead()**: Menggeser nilai elemen ke depan (menghilangkan elemen terakhir).
+
+**Cumulative Aggregate**
+
+- **cumall()**: Cumulative all (logika TRUE jika semua sebelumnya TRUE).
+- **cumany()**: Cumulative any (logika TRUE jika ada satu yang TRUE sebelumnya).
+- **cummax()**: Cumulative max (nilai maksimum hingga saat ini).
+- **cummean()**: Cumulative mean (rata-rata kumulatif).
+- **cummin()**: Cumulative min (nilai minimum hingga saat ini).
+
+**Logical**
+
+- **between(x, left, right)**: Memeriksa apakah nilai `x` berada di antara `left` dan `right`.
+- **if_else(condition, true, false)**: Memberikan nilai berdasarkan kondisi logika.
+- **case_when(...)**: Mengatur beberapa kondisi logika untuk menghasilkan nilai berbeda.
+
+**Rank**
+
+- **min_rank()**: Memberikan ranking berdasarkan nilai terkecil.
+- **dense_rank()**: Mirip dengan `min_rank()`, tetapi tidak ada jeda pada nilai yang sama.
+- **row_number()**: Memberikan nomor baris unik berdasarkan urutan.
+
+**Window Functions**
+
+- **ntile(x, n)**: Mengelompokkan nilai `x` ke dalam `n` kelompok.
+- **percent_rank()**: Memberikan ranking persentil.
+- **cume_dist()**: Menghitung distribusi kumulatif.
+
+### c. Merubah nama dari kolom/variabel
+
+Fungsi `rename()` dipergunakan untuk rename variabel, implementasi kode:
+```{r}
+head(
+  rename(mtcars_tibble, mpg_rename = mpg)
+)
+```
+Variabel mpg telah direname menjadi variabel mpg_rename
+
+## 4. Membuat Summary
+Summary pada baris dan kolom adalah proses untuk menghasilkan ringkasan statistik dari data. Ini melibatkan perhitungan statistik deskriptif seperti rata-rata, median, dan deviasi standar untuk setiap baris atau kolom dalam dataset. Summary ini memberikan gambaran umum tentang distribusi dan karakteristik data.
+
+Pada bagian kali ini, masih menggunakan dataset mtcars, dataset bawaan. Versi tibble dari mtcars sudah dibuat di atas.
+
+### a. Menggunakan summaries
+```{r}
+summarise(mtcars_tibble, ratarata = mean(mpg))
+```
+
+Fungsi `summarise()` dikombinasikan dengan `mean()` akan menghasilkan rata-rata dari variabel "mpg".
+
+### b. Menggunakan count
+```{r}
+count(mtcars_tibble, cyl)
+```
+
+Fungsi count() akan menghasilkan jumlah observasi untuk setiap nilai unik dalam suatu variabel.
+
+Berikut adalah beberapa fungsi yang dapat digunakan bersamaan dengan `summarise()`:
+
+**Count**:
+
+- `n()` : Menghitung jumlah baris.
+- `n_distinct()` : Menghitung jumlah nilai unik pada kolom.
+- `sum()` : Menghitung jumlah total nilai pada suatu kolom.
+
+**Position**:
+
+- `first()` : Mengambil nilai pertama dari suatu kolom.
+- `last()` : Mengambil nilai terakhir dari suatu kolom.
+- `nth(n)` : Mengambil nilai pada posisi ke-n dalam suatu kolom.
+
+**Order**:
+
+- `min()` : Mengambil nilai minimum dari suatu kolom.
+- `max()` : Mengambil nilai maksimum dari suatu kolom.
+- `quantile(p)` : Mengambil kuantil tertentu, misalnya kuartil ke-1, ke-3, atau persentil tertentu.
+
+**Rank**:
+
+- `row_number()` : Mengurutkan nilai dalam suatu kolom berdasarkan urutan baris.
+- `dense_rank()` : Mengurutkan nilai dengan peringkat yang padat, tanpa lompatan peringkat.
+- `percent_rank()` : Menghitung persentase ranking suatu nilai dalam dataset.
+- `cume_dist()` : Menghitung distribusi kumulatif suatu nilai.
+
+**Spread**:
+
+- `mean()` : Menghitung rata-rata dari suatu kolom.
+- `sum()` : Menjumlahkan semua nilai dalam suatu kolom.
+- `sd()` : Menghitung standar deviasi dari suatu kolom.
+- `var()` : Menghitung varians dari suatu kolom.
+- `IQR()` : Menghitung interquartile range (rentang antar kuartil).
+
+## 5. Operator Pipes
+Operator pipes (`%>%`) dalam R, terutama digunakan dalam **tidyverse**, memungkinkan kita untuk mengalirkan hasil dari satu fungsi ke fungsi berikutnya tanpa harus membuat variabel sementara di setiap langkah. Ini membuat kode lebih rapi dan mudah dibaca, terutama saat bekerja dengan banyak transformasi data.
+
+Dalam bahasa sederhana, operator pipes mengambil output dari satu fungsi dan memasukkannya sebagai input ke fungsi berikutnya. Pada bagian kali ini, masih menggunakan dataset mtcars, dataset bawaan. Versi tibble dari mtcars sudah dibuat di atas.
+
+### a. tanpa pipes
+
+Misalkan Anda ingin mengambil data mobil dengan lebih dari 6 silinder, kemudian menghitung rata-rata `mpg` (miles per gallon) dari mobil-mobil tersebut. Tanpa pipes, kodenya bisa menjadi:
+```{r}
+mtcars_filtered <- mtcars_tibble[mtcars$cyl > 6, ]
+mean_mpg <- mean(mtcars_filtered$mpg)
+mean_mpg
+```
+
+### b. dengan pipes
+implementasi kode
+```{r}
+mtcars_tibble %>%
+  filter(cyl > 6) %>%
+  summarise(mean_mpg = mean(mpg))
+```
+
+Dalam kode di atas:
+
+- `mtcars_tibble` adalah data input kita.
+- `filter(cyl > 6)` memilih mobil dengan lebih dari 6 silinder.
+- `summarise(mean_mpg = mean(mpg))` menghitung rata-rata `mpg` untuk mobil-mobil yang difilter.
+
+contoh lain
+```{r}
+mtcars_tibble %>% 
+ select(cyl, disp,hp,wt,vs) %>% 
+ filter(cyl == 6 & between(wt, 2, 4)) %>% 
+ arrange(disp, desc(hp))
+```
+
+Syntax diatas menunjukkan untuk mengambil variabel cyl, disp, hp, wt, dan vs dari dataset mtcars. Kemudian dilakukan filter berdasarkan variabel cyl yang bernilai 6 dan variabel wt yang bernilai 2 sampai 4. Selanjutnya diurutkan secara ascending berdasarkan variabel disp serta diurutkan secara descending berdasarkan variabel hp.
+
+Operator pipes (`%>%`) adalah cara yang efektif untuk menulis kode R yang lebih bersih dan mudah dibaca. Dengan pipes, kita bisa memproses data secara berurutan tanpa harus membuat variabel sementara, memungkinkan alur kerja yang lebih efisien. Kekuatan pipes sangat terasa saat bekerja dengan banyak operasi transformasi data seperti `filter()`, `summarise()`, dan `arrange()`.
+
+## 6. Mengkategorikan Baris
+Mengkategorikan baris melibatkan proses pengelompokan data berdasarkan kategori atau label tertentu. Pada bagian kali ini, masih menggunakan dataset mtcars, dataset bawaan, untuk mengelompokkan baris. Versi tibble dari mtcars sudah dibuat di atas.
+
+### a. menggunakan `group_by`
+Fungsi `group_by` dipergunakan untuk mengkategorikan berdasarkan variabel/kolom, implementasi kode
+```{r}
+mtcars_tibble %>% 
+ group_by(cyl) %>%
+ summarise(avg=mean(mpg))
+```
+
+Syntax tersebut akan menampilkan rata-rata dari setiap nilai pada variabel cyl.
+
+### b. menggunakan `rowwise`
+Fungsi `group_by` dipergunakan untuk mengkategorikan berdasarkan variabel/kolom, implementasi kode
+```{r}
+mtcars_rowwise <- mtcars_tibble %>%
+  rowwise() %>%
+  mutate( average_mpg_cyl = mean( c(mpg, cyl) ) )
+```
+
+Syntax tersebut akan membuat variabel baru dengan nama average_mpg_cyl yang merupakan nilai rata-rata dari variabel mpg dan cyl untuk semua baris kemudian disimpan dalam variabel/tibble baru yaitu mtcars_rowwise.
+
+```{r}
+mtcars_rowwise %>%
+  head()
+```
