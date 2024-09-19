@@ -1,0 +1,409 @@
+---
+title: "Komputasi Statistika dengan R (bagian 1)"
+author: "Noviyanti Santoso & Mochammad Reza Habibi"
+date: "2024-09-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# R Pendahuluan & Pengenalan R
+
+## 1. R sebagai kalkulator
+```{r}
+1+2 #addition
+1-2 #substraction
+1*2 #multiplication
+1/2 #division
+1^2 #exponentiation
+1%%2 #modulus
+
+sqrt(x = 16) 
+#sqrt adalah fungsi untuk hitung nilai akar dari x (dalam fungsi, x disebut parameter)  
+exp(x = 1)
+#exp adalah fungsi untuk hitung nilai exp dari x
+```
+
+## 2. Variabel Assignment pada R
+```{r}
+a <- 3 #assign nilai 3 pada variabel/objek a
+b <- 4 #assign nilai 4 pada variabel/objek b
+c <- a*b
+c
+```
+
+## 3. Tipe Data pada R
+R memiliki beberapa tipe data dasar yang penting untuk dipahami:
+
+- **Numerik**: Tipe data ini digunakan untuk menyimpan angka yang mengandung desimal, seperti 3.14 atau 2.718. Meskipun bilangan bulat juga bisa dianggap numerik, kita biasanya menggunakan tipe terpisah untuk bilangan bulat.
+
+- **Integer**: Untuk menyimpan bilangan bulat, kita menggunakan tipe integer. Dalam R, integer dinyatakan dengan menambahkan "L" setelah angkanya, seperti 10L. Ini mengindikasikan bahwa 10 adalah bilangan bulat, bukan numerik dengan desimal.
+
+- **Logis (Logical)**: Tipe data ini hanya memiliki dua nilai yaitu TRUE atau FALSE. Ini biasanya digunakan dalam kondisi atau perbandingan. Ada juga nilai **NA**, yang digunakan untuk menunjukkan data yang hilang (missing values).
+
+- **Karakter (Character)**: Tipe data karakter digunakan untuk menyimpan string, yaitu urutan huruf, angka, atau simbol. Contohnya, "Hello, world!" adalah data karakter.
+
+- **Faktor (Factor)**: Faktor adalah tipe data khusus dalam R yang menyimpan data kategori. Ini mirip dengan string, tetapi faktor memiliki level yang bisa diurutkan atau dikategorikan. Faktor sering digunakan dalam analisis statistik untuk mewakili variabel kategorikal.
+
+Di bawah ini adalah contoh sederhana untuk setiap tipe data:
+```{r}
+# 1. Data Numerik
+numerik <- 3.14  # Bilangan desimal
+class(numerik)   # Memeriksa tipe data
+
+# 2. Data Integer
+integer <- 10L  # Tambahkan "L" untuk menunjukkan bilangan bulat
+class(integer)
+
+# 3. Data Logis (Boolean)
+logis <- TRUE  # bisa TRUE atau FALSE
+class(logis)
+
+# 4. Nilai NA (untuk nilai yang hilang)
+logis_na <- NA
+class(logis_na)
+
+# 5. Data Karakter (String)
+karakter <- "Hello, world!" # 'Hello, world!'
+class(karakter)
+
+# 6. Data Faktor (Faktor adalah string dengan level)
+faktor <- factor(c("Rendah", "Tinggi")) # c adalah vektor
+class(faktor)  # Memeriksa tipe data
+levels(faktor) # Memeriksa level pada faktor
+```
+
+## 4. Struktur Data pada R
+R memiliki berbagai struktur data yang digunakan untuk menyimpan dan mengorganisir tipe data. Berikut adalah beberapa struktur data utama dalam R:
+
+- **Vektor (Vector)**: Vektor adalah sekumpulan elemen dengan tipe data yang sama. Anda bisa membuat vektor dengan fungsi `c()`. Misalnya, vektor bisa terdiri dari semua numerik, karakter, atau logis.
+
+- **Matriks (Matrix)**: Matriks adalah struktur data dua dimensi yang terdiri dari elemen-elemen **dengan tipe yang sama**. Matriks memiliki baris dan kolom, dan digunakan untuk menyimpan data dalam format tabel.
+
+- **Array**: Array mirip dengan matriks, tetapi dapat memiliki lebih dari dua dimensi. Array digunakan untuk menyimpan data **dengan tipe yang sama** di beberapa dimensi.
+
+- **Data Frame**: Data frame adalah struktur data dua dimensi di mana setiap kolom dapat memiliki tipe data yang berbeda (misalnya, numerik, karakter, atau logis). Data frame sering digunakan untuk menyimpan dataset karena fleksibilitasnya dalam menyimpan berbagai tipe data.
+
+- **List**: List adalah struktur data yang fleksibel yang dapat menyimpan elemen-elemen dengan tipe data berbeda. List dapat berisi vektor, matriks, data frame, atau bahkan list lain.
+
+Di bawah ini adalah contoh dari masing-masing struktur data:
+```{r}
+# 1. Vektor
+vektor <- c(10, 20, 30, 40, 50)  # Vektor numerik
+vektor
+class(vektor)  # Memeriksa tipe struktur data
+
+# 2. Matriks
+matriks <- matrix(1:9, nrow = 3, ncol = 3)  # Matriks 3x3 dengan angka 1 sampai 9
+#  (1:9) sama dengan c(1,2,3,4,5,6,7,8,9)
+matriks
+class(matriks)
+
+# 3. Array
+array_data <- array(1:12, dim = c(3, 2, 2))  # Array 3x2x2 
+# secara sederhana, anggap saja sama dengan Anda memiliki 3 matriks berukuran 2x2
+array_data
+class(array_data)
+
+# 4. Data Frame
+data_frame <- data.frame(
+  Nama = c("Andi", "Budi", "Citra"),
+  Umur = c(25, 30, 22),
+  Tinggi = c(170, 180, 165)
+)
+data_frame
+class(data_frame)
+
+# 5. List
+list_data <- list(
+  angka = c(1, 2, 3),
+  karakter = c("satu", "dua", "tiga"),
+  matriks = matrix(1:4, nrow = 2)
+)
+list_data
+class(list_data)
+```
+
+## 5. Operator Aritmatika, Operator Pembanding, Operator Logika, dan Operator Khusus
+
+Dalam R, **operator** digunakan untuk melakukan berbagai operasi pada data, mulai dari perhitungan aritmatika hingga evaluasi logika. Operator dapat dibagi menjadi beberapa jenis utama:
+
+### A. Operator Aritmatika
+Operator aritmatika digunakan untuk melakukan perhitungan matematis pada angka. Beberapa operator aritmatika yang paling umum dalam R adalah:
+
+- `+` : Penjumlahan
+- `-` : Pengurangan
+- `*` : Perkalian
+- `/` : Pembagian
+- `^` : Pangkat
+- `%%` : Modulus (sisa pembagian)
+- `%/%` : Pembagian bulat
+```{r}
+# Operator Aritmatika
+a <- 10
+b <- 3
+penjumlahan <- a + b
+pengurangan <- a - b
+perkalian <- a * b
+pembagian <- a / b
+pangkat <- a ^ b
+modulus <- a %% b
+pembagian_bulat <- a %/% b
+penjumlahan
+pengurangan
+perkalian
+pembagian
+pangkat
+modulus
+pembagian_bulat
+```
+
+### B. Operator Pembanding
+Operator pembanding digunakan untuk membandingkan dua nilai dan mengembalikan hasil logika (TRUE atau FALSE). Beberapa operator pembanding dalam R termasuk:
+
+- `==` : Sama dengan
+- `!=` : Tidak sama dengan
+- `>` : Lebih besar dari
+- `<` : Lebih kecil dari
+- `>=` : Lebih besar atau sama dengan
+- `<=` : Lebih kecil atau sama dengan
+```{r}
+# Operator Pembanding
+sama_dengan <- a == b
+tidak_sama <- a != b
+lebih_besar <- a > b
+lebih_kecil <- a < b
+sama_dengan
+tidak_sama
+lebih_besar
+lebih_kecil
+```
+
+### C. Operator Logika
+Operator logika digunakan untuk menggabungkan atau membandingkan pernyataan logika. Beberapa operator logika dalam R adalah:
+
+- `&` : Dan (AND) – mengembalikan TRUE jika kedua pernyataan benar
+- `|` : Atau (OR) – mengembalikan TRUE jika salah satu pernyataan benar
+- `!` : Tidak (NOT) – membalikkan nilai logika (TRUE menjadi FALSE, dan sebaliknya)
+-`xor()` : Eksklusif OR – mengembalikan TRUE jika salah satu pernyataan benar, tetapi tidak keduanya
+```{r}
+# Operator Logika
+x <- TRUE
+y <- FALSE
+dan <- x & y
+atau <- x | y
+tidak <- !x
+xor_logika <- xor(x, y)
+dan
+atau
+tidak
+xor_logika
+```
+
+### D. **Operator Khusus**
+R juga memiliki beberapa operator khusus untuk tugas-tugas tertentu, seperti:
+
+- `:` : Membuat urutan angka
+- `%in%` : Memeriksa apakah suatu elemen ada di dalam sebuah vektor atau list
+- `$` : Mengakses elemen dalam data frame atau list
+```{r}
+# Operator Khusus
+urutan <- 1:10  # Membuat urutan dari 1 hingga 10
+urutan
+
+elemen_ada <- 3 %in% c(1, 2, 3, 4, 5)  # Memeriksa apakah 3 ada di dalam vektor
+elemen_ada
+```
+
+## 6. Dasar Pemrograman di R
+
+Dalam pemrograman di R, terdapat beberapa konsep dasar yang sering digunakan untuk mengontrol alur eksekusi kode dan memproses data. Tiga konsep penting yang akan dibahas adalah **struktur kendali**, **struktur perulangan**, dan **fungsi**.
+
+### A. Struktur Kendali (Control Structures)
+
+Struktur kendali digunakan untuk membuat keputusan dalam program, memungkinkan eksekusi kode berdasarkan kondisi tertentu.
+
+- **`if`, `else if`, dan `else`**: Digunakan untuk menjalankan blok kode tertentu jika kondisi logika terpenuhi.
+- **`switch`**: Digunakan untuk memilih salah satu dari beberapa opsi berdasarkan nilai dari suatu ekspresi.
+```{r}
+# Struktur Kendali
+
+x <- 5
+
+# if, else if, else
+if (x > 7) {
+  print("Nilai x lebih besar dari 7")
+} else if (x == 5) {
+  print("Nilai x sama dengan 5")
+} else {
+  print("Nilai x kurang dari 7")
+}
+
+# switch
+pilihan <- "B"
+hasil <- switch(pilihan,
+                "A" = "Anda memilih A",
+                "B" = "Anda memilih B",
+                "C" = "Anda memilih C",
+                "Pilihan tidak valid")
+print(hasil)
+```
+
+### B. Struktur Perulangan (Loops)
+
+Struktur perulangan digunakan untuk mengulangi eksekusi blok kode beberapa kali.
+
+- **`for` loop**: Digunakan untuk mengulangi blok kode untuk setiap elemen dalam sebuah vektor, daftar, atau objek lain.
+- **`while` loop**: Digunakan untuk mengulangi blok kode selama kondisi logika yang diberikan bernilai TRUE.
+- **`repeat`**: Digunakan untuk membuat perulangan tanpa batasan, hingga pernyataan `break` menghentikan eksekusi loop.
+  
+Selain itu, terdapat dua pernyataan penting yang dapat digunakan dalam perulangan:
+- **`break`**: Menghentikan eksekusi loop sepenuhnya sebelum kondisi loop selesai.
+- **`next`**: Melewati iterasi saat ini dan langsung melanjutkan ke iterasi berikutnya.
+```{r}
+# Struktur Perulangan
+
+# for loop
+for (i in 1:5) {
+  print(paste("Iterasi ke-", i))
+}
+
+# while loop
+y <- 1
+while (y <= 5) {
+  print(paste("y =", y))
+  y <- y + 1
+}
+
+# repeat loop
+z <- 1
+repeat {
+  print(paste("z =", z))
+  z <- z + 1
+  if (z > 5) {
+    break  # Menghentikan loop saat z > 5
+  }
+}
+
+# Menggunakan `next` untuk melewati iterasi tertentu
+for (i in 1:10) {
+  if (i %% 2 == 0) {
+    next  # Melewati iterasi saat i genap
+  }
+  print(i)
+}
+```
+
+### C. Fungsi dalam R
+
+Fungsi memungkinkan Anda mengelompokkan serangkaian instruksi yang dapat digunakan kembali di berbagai bagian program. Dalam R, fungsi dibuat dengan menggunakan kata kunci `function`. Selain fungsi bawaan, Anda juga dapat membuat fungsi kustom sesuai dengan kebutuhan.
+
+Selain fungsi biasa, terdapat dua jenis fungsi yang penting:
+- **Fungsi Rekursif**: Fungsi yang memanggil dirinya sendiri untuk menyelesaikan masalah yang dapat dipecah menjadi sub-masalah yang lebih kecil (contoh: perhitungan faktorial).
+- **Fungsi Anonim**: Fungsi yang tidak diberi nama, biasanya digunakan untuk operasi singkat seperti di dalam `apply()`.
+```{r}
+# Fungsi dalam R
+
+# Membuat fungsi sederhana
+fungsi_tambah <- function(a, b) {
+  hasil <- a + b
+  return(hasil)
+}
+
+# Memanggil fungsi
+tambah <- fungsi_tambah(10, 20)
+print(paste("Hasil penjumlahan: ", tambah))
+
+# Fungsi Rekursif: Menghitung Faktorial
+faktorial <- function(n) {
+  if (n == 0) return(1)
+  else return(n * faktorial(n - 1))
+}
+
+# Memanggil fungsi rekursif
+faktorial(5)
+
+# Fungsi Anonim
+hasil_kuadrat <- sapply(1:5, function(x) x^2)
+print(hasil_kuadrat)
+
+# Fungsi dengan nilai default
+fungsi_salam <- function(nama = "Pengguna") {
+  print(paste("Halo,", nama, "!"))
+}
+
+# Memanggil fungsi tanpa argumen (menggunakan nilai default)
+fungsi_salam()
+
+# Memanggil fungsi dengan argumen
+fungsi_salam("Andi")
+```
+
+## 7. Package/Libary pada R
+
+Salah satu fitur yang membuat R sangat kuat adalah kemampuannya untuk menggunakan **package** atau **library**. Package adalah kumpulan fungsi yang dirancang untuk membantu dalam berbagai tugas, mulai dari analisis data hingga visualisasi.
+
+### A. Instalasi Package
+
+Untuk menggunakan package, Anda perlu menginstalnya terlebih dahulu dari **CRAN**. Berikut adalah cara instalasi package:
+```{r}
+#install.packages("ggplot2")  # Menginstal package ggplot2 dari CRAN untuk vis data
+```
+
+### B. Load Package
+
+Setelah package terinstal, Anda perlu memuatnya ke dalam sesi R untuk menggunakan fungsinya. Ini bisa dilakukan dengan library():
+```{r}
+library(ggplot2)  # Memuat package ggplot2
+```
+
+## 8. Pengantar R-Markdown
+
+**R Markdown** adalah format dokumen yang digunakan untuk menggabungkan teks biasa, kode R, dan output kode (seperti grafik atau hasil analisis) dalam satu file. Dengan R Markdown, Anda dapat membuat laporan dinamis, presentasi, atau dokumen ilmiah yang secara otomatis menghasilkan output dari kode R yang Anda tulis.
+
+### A. Struktur Dasar R Markdown
+
+File R Markdown biasanya memiliki ekstensi `.Rmd` dan terdiri dari beberapa bagian berikut:
+
+- **YAML Header**: Bagian ini berada di bagian atas file dan dikelilingi oleh tiga garis `---`. YAML Header digunakan untuk mendefinisikan metadata dokumen seperti judul, penulis, tanggal, dan output yang diinginkan (HTML, PDF, atau Word).
+
+- **Teks Biasa**: Bagian ini berisi teks penjelasan, mirip dengan dokumen biasa. Anda dapat menggunakan format **Markdown** untuk penulisan teks seperti huruf tebal, miring, atau membuat daftar.
+
+- **Code Chunk**: Potongan kode R yang ditulis dalam blok khusus. Blok ini dimulai dengan tiga tanda backticks ```` ``` ```` dan diikuti oleh `{r}`.
+
+### B. Contoh Struktur Dasar R Markdown:
+```yaml
+---
+title: "Laporan Analisis Data"
+author: "Nama Anda"
+date: "09-09-2024"
+output: html_document
+---
+```
+
+### C. Menulis Teks di R Markdown
+
+Anda bisa menulis teks biasa seperti ini. Markdown mendukung format teks yang umum, misalnya:
+
+**Tebal**: `**tebal**` → **tebal**
+
+*Miring*: `*miring*` → *miring*
+
+Daftar berurutan dapat dibuat dengan menggunakan angka diikuti oleh titik. Contohnya:
+
+1. Item satu
+2. Item dua
+
+Daftar tidak berurutan dapat dibuat dengan menggunakan tanda minus `-` atau tanda bintang `*`. Contohnya:
+
+- Item A
+- Item B
+
+### D. Menambahkan Kode R
+untuk menambahkan kode R dapat dimulai dengan \```{r} dan ditutup dengan \```
+```{r}
+# Membuat vektor dan menghitung mean
+data <- c(1, 2, 3, 4, 5)
+```

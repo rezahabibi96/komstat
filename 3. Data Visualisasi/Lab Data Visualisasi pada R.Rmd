@@ -1,0 +1,376 @@
+---
+title: "Komputasi Statistika dengan R (bagian 3)"
+author: "Noviyanti Santoso & Mochammad Reza Habibi"
+date: "2024-09-03"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Visualisasi pada R
+
+## 1. Fungsi Plot
+
+Fungsi `plot()` adalah salah satu fungsi dasar dalam R untuk membuat grafik. Fungsi ini dapat digunakan untuk membuat berbagai jenis grafik, seperti grafik titik, garis, atau keduanya, hanya dengan mengubah argumen `type`. Dengan `plot()`, kita bisa memvisualisasikan data numerik dengan berbagai opsi visual, seperti memilih warna, tipe garis, simbol titik, dan lain-lain.
+
+Sintaks umum dari fungsi `plot()` adalah sebagai berikut:
+plot(x, y, type = "p", main = "Judul Grafik", xlab = "Label X", ylab = "Label Y")
+
+- **x** dan **y**: Vektor data yang akan diplot.
+
+- **type**: Menentukan jenis plot yang akan dibuat.
+  - `"p"`: Grafik titik (points).
+  - `"l"`: Grafik garis (lines).
+  - `"b"`: Kombinasi titik dan garis (both).
+  - `"h"`: Grafik batang vertikal.
+- **main**: Judul grafik.
+- **xlab**, **ylab**: Label untuk sumbu X dan Y.
+
+a. contoh implementasi
+```{r}
+x <- c(1:10)
+plot(x, type = "p")
+```
+
+b. kustomisasi judul/main, label (xlab&ylab), warna/col
+```{r}
+plot(x, main="Latihan Grafik", xlab = "sumbu x", ylab="sumbu y", col="blue")
+```
+
+c. kustomisasi sumbu x (xlim), sumbu y (ylim), tipe (type)
+```{r}
+plot(x, xlim = c(3, 8), ylim = c(3, 8),  type="b")
+```
+
+d. contoh grafik fungsi kuadratik $x^{2} + 2x +3$
+```{r}
+x <- seq(-3, 3, 0.01)
+y <- x^2 + 2*x + 3
+
+plot(x, y, main = "Grafik Dari Fungsi Kuadrat", type="l", col="red")
+```
+
+e. contoh grafik fungsi lain $x^{2} * e^{-x/2}$
+```{r}
+x <- seq(0, 10, 0.01)
+y <- x^2 * exp(-x/2)
+
+plot(x, y, type="l")
+```
+
+## 2. Fungsi Hist
+
+Fungsi `hist()` digunakan untuk membuat histogram dalam R. Histogram adalah grafik yang menggambarkan distribusi frekuensi suatu data numerik dengan membagi data menjadi beberapa interval (bin) dan menghitung jumlah pengamatan dalam setiap interval tersebut. Grafik ini sangat berguna untuk memahami distribusi data, misalnya untuk mengetahui apakah data bersifat simetris, miring, atau memiliki outlier.
+
+Sintaks umum dari fungsi `hist()` adalah sebagai berikut:
+hist(x, breaks = "Sturges", main = "Judul Histogram", xlab = "Label X", ylab = "Frekuensi", col = "warna")
+
+- **x**: Vektor numerik yang berisi data yang akan ditampilkan dalam histogram.
+- **breaks**: Menentukan jumlah atau metode pembagian bin. Bisa berupa angka atau metode seperti `"Sturges"`, `"Scott"`, atau `"Freedman-Diaconis"`.
+- **main**: Judul histogram.
+- **xlab**: Label untuk sumbu X.
+- **ylab**: Label untuk sumbu Y, yang biasanya merepresentasikan frekuensi.
+- **col**: Menentukan warna dari bar pada histogram.
+- **freq**: Parameter ini adalah nilai logika (TRUE atau FALSE) yang menentukan apakah sumbu y histogram akan menunjukkan frekuensi absolut dari data (freq = TRUE) atau densitas relatif (freq = FALSE). Nilai default adalah TRUE, yang berarti histogram akan menampilkan frekuensi. 
+
+contoh grafik hist dari data berdistribusi normal standar
+```{r}
+set.seed(42)
+
+x <- rnorm(100, mean=0, sd=1)
+hist(x, main="Histogram N(0, 1)")
+```
+
+## 3. Fungsi Curve
+
+Fungsi `curve` dalam R adalah tool yang kuat untuk memvisualisasikan grafik fungsi matematika secara langsung. Fungsi ini memungkinkan pengguna untuk menggambarkan kurva dari persamaan fungsi tertentu dengan mudah. Pengguna dapat memplot berbagai jenis fungsi, mulai dari fungsi linier sederhana hingga fungsi non-linier yang kompleks.
+
+Fungsi `curve` biasanya digunakan untuk:
+
+- Memvisualisasikan bentuk dari suatu fungsi matematis.
+- Menambahkan kurva ke grafik yang sudah ada.
+- Membantu memahami perilaku fungsi dalam interval tertentu.
+
+Sintaks umum dari fungsi `curve()` adalah sebagai berikut:
+curve(expr, from = NULL, to = NULL, n = 101, add = FALSE, ...)
+
+- **`expr`**: Ekspresi atau fungsi matematika yang ingin digambarkan. Ekspresi ini harus menggunakan variabel `x` sebagai variabel independen.
+
+- **`from`**: Batas bawah dari domain (sumbu x) untuk menggambar kurva.
+
+- **`to`**: Batas atas dari domain untuk menggambar kurva.
+
+- **`n`**: Jumlah titik yang digunakan untuk menggambar kurva. Semakin banyak titik, semakin halus grafiknya.
+
+- **`add`**: Jika `TRUE`, kurva akan ditambahkan ke grafik yang sudah ada. Jika `FALSE`, kurva akan digambar di grafik baru.
+
+a. contoh implementasi untuk grafik fungsi linear
+```{r}
+# Memplot fungsi y = 2x + 1
+curve(2*x + 1, from = -10, to = 10, lwd = 1, main = "Grafik Fungsi Linier")
+
+```
+
+b. contoh implementasi grafik fungsi non-linear
+```{r}
+# Membuat plot untuk demonstrasi paramater add pada fungsi curve 
+x <- seq(-1, 1, 0.01)
+y <- x^3
+
+plot(x, y, type="l", col="blue")
+
+# Memplot fungsi y = x^2
+curve(x^2, from = -1, to = 1, col = "red", add = T, main = "Grafik Fungsi Non-Linier")
+```
+
+Fitur Tambahan:
+
+- Anda dapat mengkombinasikan fungsi `curve` dengan grafik lain atau menambahkan kurva pada grafik scatter plot untuk membantu visualisasi lebih lanjut. Cukup gunakan parameter `add = TRUE` untuk menambahkan kurva ke grafik yang sudah ada.
+
+- Parameter tambahan seperti warna (`col`), ketebalan garis (`lwd`), dan judul (`main`) memungkinkan pengguna untuk melakukan kustomisasi visualisasi.
+
+- Dengan fungsi `curve`, Anda bisa dengan mudah menggambarkan perilaku matematis dari suatu fungsi secara grafis, menjadikannya alat yang berguna dalam analisis data dan eksplorasi statistika di R.
+
+## 4. Fungsi Barplot
+Fungsi `barplot` dalam R adalah alat yang sangat berguna untuk memvisualisasikan data dalam bentuk diagram batang. Dengan fungsi ini, pengguna dapat dengan mudah membuat representasi grafis dari data kategorikal atau numerik. `barplot` mendukung berbagai kustomisasi, seperti pengaturan warna, orientasi batang, dan label, sehingga memungkinkan pengguna untuk membuat grafik yang informatif dan menarik.
+
+Sintaks umum dari fungsi `barplot()` adalah sebagai berikut:
+barplot(height, names.arg, col, main, xlab, ylab, horiz, beside)
+
+**Keterangan Parameter**
+
+- **`height`**:  
+  Vektor atau matriks yang berisi nilai untuk tinggi batang. Jika berupa matriks, tiap kolom akan diplot sebagai satu set batang.
+- **`names.arg`**:  
+  Label untuk sumbu-x di bawah masing-masing batang. Jika tidak ditentukan, akan menggunakan indeks elemen dari `height`.
+- **`col`**:  
+  Warna pengisian batang. Bisa berupa satu warna atau vektor warna yang diatur sesuai dengan batang yang dipetakan.
+- **`main`**:  
+  Judul utama untuk grafik.
+- **`xlab`**:  
+  Label untuk sumbu-x.
+- **`ylab`**:  
+  Label untuk sumbu-y.
+- **`horiz`**:  
+  Boolean yang menentukan orientasi batang. Jika `TRUE`, batang diplot secara horizontal. Defaultnya adalah `FALSE` (batang vertikal).
+- **`beside`**:  
+  Boolean yang menentukan apakah batang dari data matriks harus diplot berdampingan (`TRUE`) atau ditumpuk satu di atas yang lain (`FALSE`). Defaultnya adalah `FALSE`. Jika `TRUE`, masing-masing kategori dalam matriks diplot sebagai kelompok batang yang terpisah.
+
+Untuk demonstrasi fungsi barplot, akan dipergunakan data bawaan yaitu VADeaths.
+
+Dataset **`VADeaths`** merupakan salah satu dataset bawaan dalam R yang berisi **tingkat kematian** di Virginia (AS) berdasarkan **umur** dan **jenis kelamin**. Dataset ini digunakan untuk analisis data demografis dan visualisasi dalam bentuk tabel atau grafik.
+
+Dataset **`VADeaths`** adalah **matriks** dengan **5 baris** dan **4 kolom**, yang menggambarkan tingkat kematian per 1000 penduduk untuk kelompok usia dan jenis kelamin yang berbeda.
+
+- **Baris**: Kelompok usia, yaitu:
+  - **50-54**
+  - **55-59**
+  - **60-64**
+  - **65-69**
+  - **70-74**
+
+- **Kolom**: Kelompok berdasarkan jenis kelamin dan tempat tinggal:
+  - **Rural Male**: Pria yang tinggal di pedesaan.
+  - **Rural Female**: Wanita yang tinggal di pedesaan.
+  - **Urban Male**: Pria yang tinggal di perkotaan.
+  - **Urban Female**: Wanita yang tinggal di perkotaan.
+
+Untuk melihat dataset **`VADeaths`**, Anda bisa menjalankan perintah berikut di R:
+
+- str(VADeaths)
+- summary(VADeaths)
+
+load data bawaan pada R (VADeaths)
+```{r}
+data("VADeaths")
+head(VADeaths)
+```
+
+run barplot
+```{r}
+rural_male <- VADeaths[, "Rural Male"]
+barplot(rural_male, horiz=F)
+```
+
+kustomisasi barplot (versi horiz)
+```{r}
+barplot(rural_male, border="steelblue",
+        col=c("grey", "yellow", "blue", "green", "orange"),
+        names.arg = c("G1", "G2", "G3", "G4", "G5"),
+        horiz=T)
+```
+
+stacked barplot
+```{r}
+barplot(VADeaths, col=c("lightblue", "mistyrose", "lightcyan", "lavender", "cornsilk"),
+        legend=c("50-54", "55-59", "60-64", "65-69", "70-74"),
+        beside=F)
+```
+
+stacked barplot (versi beside)
+```{r}
+barplot(VADeaths, col=c("lightblue", "mistyrose", "lightcyan", "lavender", "cornsilk"),
+        legend=c("50-54", "55-59", "60-64", "65-69", "70-74"),
+        beside=T)
+```
+
+## 5. Fungsi Density
+
+Fungsi **`density`** dalam R digunakan untuk memperkirakan **fungsi kepadatan probabilitas** (probability density function) dari data numerik yang kontinu menggunakan metode **Kernel Density Estimation (KDE)**. Estimasi kepadatan ini menggambarkan distribusi probabilitas dari sebuah variabel acak secara lebih halus dibandingkan histogram, sehingga memungkinkan kita untuk melihat pola atau distribusi yang mendekati bentuk sebenarnya dari data.
+
+Fungsi **`density`** sangat berguna ketika:
+
+- Anda ingin melihat distribusi probabilitas dari data tanpa memerlukan binning seperti pada histogram.
+- Mendapatkan visualisasi yang lebih halus dan kontinu untuk memahami bentuk distribusi data.
+
+Sintaks umum dari fungsi `density()` adalah sebagai berikut:
+`density(x, kernel, n, from, to)`
+
+Penjelasan Argumen Fungsi `density`:
+
+- **`x`**  
+  Menyatakan vektor numerik yang berisi data yang akan digunakan untuk menghitung estimasi kepadatan.
+
+- **`kernel`**  
+  Menyatakan jenis kernel yang digunakan untuk estimasi kepadatan. Kernel memengaruhi bentuk kurva kepadatan. Pilihan yang tersedia adalah sebagai berikut:
+  - `"gaussian"` (DEFAULT)
+  - `"rectangular"`
+  - `"triangular"`
+  - `"epanechnikov"`
+  - `"biweight"`
+  - `"cosine"`
+  - `"optcosine"`
+
+- **`n`**  
+  Menyatakan jumlah titik yang akan digunakan untuk menghasilkan kurva kepadatan. Nilai defaultnya adalah 512.
+
+- **`from`**  
+  Menyatakan batas bawah untuk sumbu x dari kurva kepadatan. Secara default, ini ditentukan berdasarkan nilai minimum dari data dalam `x`.
+
+- **`to`**  
+  Menyatakan batas atas untuk sumbu x dari kurva kepadatan. Secara default, ini ditentukan berdasarkan nilai maksimum dari data dalam `x`.
+
+Untuk informasi lebih lanjut tentang fungsi `density`, Anda dapat merujuk ke dokumentasi resmi R atau tutorial terkait.
+
+Untuk demonstrasi plot density, akan dipergunakan data bawaan yaitu trees.
+
+Dataset **`trees`** adalah data bawaan dalam R yang berisi informasi tentang dimensi pohon **Black Cherry**. Dataset ini sering digunakan untuk analisis regresi linier dan visualisasi data, serta mencakup tiga variabel utama yang menggambarkan ukuran pohon dan volume kayu yang dihasilkan.
+
+Dataset ini terdiri dari **31 baris** dan **3 kolom**, yang mewakili pengukuran dari pohon cherry hitam (black cherry trees). Variabel-variabel dalam dataset adalah sebagai berikut:
+
+- **`Girth`**: Diameter pohon (dalam inci) diukur pada ketinggian 4.5 kaki dari tanah.
+- **`Height`**: Tinggi pohon (dalam kaki).
+- **`Volume`**: Volume kayu yang dihasilkan oleh pohon (dalam satuan kaki kubik).
+
+Untuk melihat gambaran umum dari dataset, Anda bisa menjalankan perintah berikut di R:
+
+- str(trees)
+- summary(trees)
+
+load data bawaan pada R (trees)
+```{r}
+data("trees")
+head(trees)
+```
+
+plot density
+```{r}
+density_height <- density(trees$Height)
+plot(density_height)
+```
+
+## 6. Fungsi Boxplot
+
+Fungsi `boxplot` dalam R adalah alat visual yang digunakan untuk menggambarkan distribusi data kuantitatif secara grafis melalui kotak-kotak (box). Boxplot, atau yang sering disebut juga sebagai **box-and-whisker plot**, menunjukkan ringkasan lima nilai penting dari suatu dataset, yaitu **minimum**, **kuartil pertama (Q1)**, **median (Q2)**, **kuartil ketiga (Q3)**, dan **maksimum**. Selain itu, boxplot juga berguna untuk mendeteksi outliers atau nilai pencilan dalam data.
+
+Fungsi `boxplot` sering digunakan dalam analisis data eksploratif untuk:
+
+- Meringkas distribusi data.
+- Membandingkan distribusi beberapa grup data.
+- Mendeteksi outliers atau nilai pencilan.
+- Menyajikan visualisasi yang sederhana namun informatif mengenai dispersi dan kecenderungan pusat data.
+
+Sintaks umum dari fungsi `boxplot()` adalah sebagai berikut:
+boxplot(x, main = NULL, xlab = NULL, ylab = NULL, col = NULL, border = NULL, ...)
+
+- **`x`**: Vektor data atau list dari beberapa grup data yang ingin dibuat boxplotnya.
+
+- **`main`**: Judul utama plot.
+
+- **`xlab`**: Label untuk sumbu x.
+
+- **`ylab`**: Label untuk sumbu y.
+
+- **`col`**: Warna kotak dalam plot.
+
+- **`border`**: Warna batas kotak.
+
+- **`...`**: Argumen tambahan untuk kustomisasi lebih lanjut.
+
+Untuk demonstrasi fungsi boxplot, akan dipergunakan data bawaan yaitu iris.
+
+Dataset **`iris`** adalah salah satu dataset paling terkenal dan sering digunakan dalam pembelajaran statistik dan machine learning. Dataset ini berisi informasi mengenai **morfologi bunga Iris**, dengan tiga spesies bunga yang berbeda: **setosa**, **versicolor**, dan **virginica**. Dataset ini digunakan untuk berbagai jenis analisis, terutama dalam klasifikasi dan visualisasi data.
+
+Dataset **`iris`** terdiri dari **150 baris** dan **5 kolom**, dengan masing-masing baris mewakili pengukuran satu bunga. Lima kolom tersebut adalah:
+
+- **`Sepal.Length`**: Panjang kelopak bunga (dalam cm).
+- **`Sepal.Width`**: Lebar kelopak bunga (dalam cm).
+- **`Petal.Length`**: Panjang mahkota bunga (dalam cm).
+- **`Petal.Width`**: Lebar mahkota bunga (dalam cm).
+- **`Species`**: Spesies bunga, dengan tiga jenis: *setosa*, *versicolor*, dan *virginica*.
+
+Untuk melihat gambaran umum dari dataset ini, Anda bisa menjalankan perintah berikut di R:
+
+- str(iris)
+- summary(iris)
+
+
+load data bawaan pada R (iris)
+```{r}
+data("iris")
+head(iris)
+```
+
+Kemudian, Anda akan membuat boxplot dari fitur Length pada data data iris.
+
+run boxplot (single boxplot)
+```{r}
+boxplot(iris$Sepal.Length, col="steelblue")
+```
+
+Kemudian dibuat boxplot dari fitur sepal.Length untuk masing-masing Species, ditunjukkan oleh 'iris\$Sepal.Length\~iris\$Species'.
+
+run boxplot (multi boxplot)
+
+```{r}
+boxplot(iris$Sepal.Length~iris$Species, xlab="spesies", ylab="length",
+        border="steelblue", col=c("#97E7E1", "#6AD4DD", "#7AA2E3"))
+```
+
+## 7. Grafik Khusus Data Kategorik
+
+**Pie chart** adalah jenis grafik yang sering digunakan untuk menggambarkan distribusi atau proporsi data **kategorik** dalam bentuk irisan lingkaran. Setiap irisan mewakili proporsi dari setiap kategori terhadap total keseluruhan, dan semakin besar proporsi suatu kategori, semakin besar pula irisan dalam grafik pie tersebut.
+
+Grafik **pie chart** sangat cocok digunakan ketika:
+
+- Anda ingin memperlihatkan **perbandingan proporsi** dari berbagai kategori dalam satu kelompok data.
+- Data yang dianalisis memiliki jumlah kategori yang terbatas, sehingga setiap kategori dapat direpresentasikan secara visual.
+
+Berikut adalah contoh sederhana penggunaan **pie chart** dalam R untuk data kategorik Species pada data iris.
+
+summary factor
+```{r}
+str(iris$Species)
+```
+
+pie chart
+```{r}
+pie(table(iris$Species))
+```
+
+
+REFERENCE
+
+[1] https://ourcodingclub.github.io/tutorials/datavis/
