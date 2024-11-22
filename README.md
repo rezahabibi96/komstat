@@ -2,16 +2,12 @@
 
 This repository contains resources for the **massive open online course (MOOC)** titled **'Komputasi Statistika dengan R'**, supported by **Institut Teknologi Sepuluh Nopember**.
 
-![R Logo](https://www.r-project.org/logo/Rlogo.png)
-
 ## Course Description
 
-The course **Komputasi Statistika dengan R** (Statistical Computing with R) aims to teach students how to perform statistical analysis using the R programming language. The course covers a wide range of statistical techniques and includes hands-on exercises to help students develop practical skills.
+The course **Komputasi Statistika dengan R** (Statistical Computing with R) aims to teach students how to perform statistical analysis using the R programming language.
 
 ## Repository Contents
 
-- **Lectures**: Slides, lecture notes, and other teaching materials
-- **Assignments**: Practical exercises and assignments for students
 - **R Scripts**: Code snippets and examples used in the course
 - **Data**: Datasets used for practice and analysis
 
