@@ -18,7 +18,7 @@ To get started with the materials:
 1. Download or clone the repository using the following command:
 
     ```bash
-    git clone https://github.com/yourusername/komputasi-statistika-dengan-r.git
+    git clone https://github.com/rezahabibi96/mooc-komstat.git
     ```
 
 2. Install R from the [R Project website](https://www.r-project.org/).
@@ -26,7 +26,7 @@ To get started with the materials:
 3. Install required R packages:
 
     ```r
-    install.packages(c("ggplot2", "dplyr", "tidyr"))
+    install.packages(c("tidyverse"))
     ```
 
 ## License
