@@ -20,13 +20,20 @@ To get started with the materials:
     ```bash
     git clone https://github.com/rezahabibi96/mooc-komstat.git
     ```
+2. **Install RStudio**:
+   After installing R, it is highly recommended to install **RStudio**, an integrated development environment (IDE) for R. You can download RStudio from the [RStudio website](https://posit.co/download/rstudio-desktop/).
 
-2. Install R from the [R Project website](https://www.r-project.org/).
+3. **Clone the repository**:
+   Download or clone the repository using the following command:
 
-3. Install required R packages:
+    ```bash
+    git clone https://github.com/yourusername/komputasi-statistika-dengan-r.git
+    ```
+4. **Install required R packages**:
+   Open RStudio and install the required R packages by running the following command in the R console:
 
     ```r
-    install.packages(c("tidyverse"))
+    install.packages(c("ggplot2", "dplyr", "tidyr"))
     ```
 
 ## License
