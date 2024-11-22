@@ -1,4 +1,4 @@
-# Repository for 'Komputasi Statistika dengan R' MOOC
+# MOOC 'Komputasi Statistika dengan R'
 
 This repository contains resources for the **massive open online course (MOOC)** titled **'Komputasi Statistika dengan R'**, supported by **Institut Teknologi Sepuluh Nopember**.
 
